@@ -1,4 +1,9 @@
 javascript:(function(){
+	/**
+	 * Execute a simulated mouseover event.
+	 *
+	 * @param element el Passed element.
+	 */
 	function simulateMouseover(el) {
 		var event = new MouseEvent('mouseover', {
 			'view': window,
@@ -38,6 +43,9 @@ javascript:(function(){
 		}
 	}
 
+	/**
+	 * Locate focusable elements and attach an empty mouseover event listener to each.
+	 */
 	function mouseOverBehaviour() {
 		const focusable = document.querySelectorAll( 'a[href], button, input, textarea, select, details, [tabindex]' );
 		focusable.forEach((el) => {
@@ -47,6 +55,14 @@ javascript:(function(){
 	}
 	mouseOverBehaviour();
 
+	/**
+	 * Get the computer foreground or background color for an element.
+	 *
+	 * @param element el Element to inspect.
+	 * @param string  context 'background' or 'foreground'.
+	 *
+	 * @return string|null
+	 */
 	function getComputedColor( el, context ) {
 		while ( el ) {
 			const color = ( 'background' === context ) ? window.getComputedStyle( el ).backgroundColor : window.getComputedStyle( el ).color;
@@ -67,10 +83,25 @@ javascript:(function(){
 		return null;
 	}
 
+	/**
+	 * Convert an RGB color value to a Hexadecimal string.
+	 *
+	 * @param array rgb values.
+	 *
+	 * @return String
+	 */
 	function rgbToHex( rgb ) {
 		return ( '#' + rgb.map( ( value ) => value.toString( 16 ).padStart( 2, '0' ) ).join( '' ));
 	}
 
+	/**
+	 * Get the contrast ratio between two colors.
+	 *
+	 * @param string color1 First color in hex format.
+	 * @param string color2 Second color in hex format.
+	 *
+	 * @return float
+	 */
 	function getContrastRatio( color1, color2 ) {
 		const luminance1 = calculateLuminance( color1 );
 		const luminance2 = calculateLuminance( color2 );
@@ -79,6 +110,13 @@ javascript:(function(){
 		return ( lighter + 0.05 ) / ( darker + 0.05 );
 	}
 
+	/**
+	 * Calculate the luminance of a color.
+	 *
+	 * @param string color Hex color.
+	 *
+	 * @return float
+	 */
 	function calculateLuminance( color ) {
 		const rgb = hexToRgb( color );
 		const [ r, g, b ] = rgb.map( ( value ) => {
@@ -88,71 +126,18 @@ javascript:(function(){
 		return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 	}
 
+	/**
+	 * Convert a hexadecimal color value to an RGB array.
+	 *
+	 * @param string hex Hexadecimal color string.
+	 *
+	 * @return array
+	 */
 	function hexToRgb( hex ) {
 		const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 		hex = hex.replace( shorthandRegex, ( _, r, g, b ) => r + r + g + g + b + b );
 		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec( hex );
 		return result ? [ parseInt( result[ 1 ], 16 ), parseInt( result[ 2 ], 16 ), parseInt( result[ 3 ], 16 ), ] : null;
-	}
-
-	function rgbToHsl( r, g, b ) {
-		r /= 255;
-		g /= 255;
-		b /= 255;
-		const max = Math.max( r, g, b ),
-			min = Math.min( r, g, b );
-		let h, s;
-		const l = ( max + min ) / 2;
-
-		if ( max === min ) {
-			h = s = 0;
-		} else {
-			const d = max - min;
-			s = l > 0.5 ? d / ( 2 - max - min ) : d / ( max + min );
-			switch ( max ) {
-				case r:
-					h = ( g - b ) / d + ( g < b ? 6 : 0 );
-					break;
-				case g:
-					h = ( b - r ) / d + 2;
-					break;
-				case b:
-					h = ( r - g ) / d + 4;
-					break;
-			}
-			h /= 6;
-		}
-
-		return [ h, s, l ];
-	}
-
-	function hslToRgb( h, s, l ) {
-		let r, g, b;
-
-		if ( s === 0 ) {
-			r = g = b = l;
-		} else {
-			const hue2rgb = ( p, q, t ) => {
-				if ( t < 0 ) t += 1;
-				if ( t > 1 ) t -= 1;
-				if ( t < 1 / 6 ) return p + ( q - p ) * 6 * t;
-				if ( t < 1 / 2 ) return q;
-				if ( t < 2 / 3 ) return p + ( q - p ) * ( 2 / 3 - t ) * 6;
-				return p;
-			};
-
-			const q = l < 0.5 ? l * ( 1 + s ) : l + s - l * s;
-			const p = 2 * l - q;
-			r = hue2rgb( p, q, h + 1 / 3 );
-			g = hue2rgb( p, q, h );
-			b = hue2rgb( p, q, h - 1 / 3 );
-		}
-
-		return [
-			Math.round( r * 255 ),
-			Math.round( g * 255 ),
-			Math.round( b * 255 ),
-		];
 	}
 
 })();
